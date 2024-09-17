@@ -13,7 +13,7 @@ Double on any two cards
 Player can surrender after dealer checks for Blackjack
 Shuffle after every hand
 
-According to various online calculators of the win rate, the player will effectively win 50.06 percent of games, and using the algorithm that I developed from scratch, I managed to achieve that same win rate over the simulation of more than one billion games of Blackjack.
+According to various online calculators of the win rate, the player will effectively win 50.08 percent of games, and using the algorithm that I developed from scratch, I managed to achieve that same win rate over the simulation of more than one billion games of Blackjack.
 
 
 The Algorithm:
@@ -35,5 +35,5 @@ At this point, the dealer will then play out their hand and through over 1.2 bil
 Other notes regarding design and efficiency:
 
 At one point, I attempted to incorporate classes into this program while utilizing inheritance, but the construction of so many objects during one run of a game proved to be too detrimental to the runtime of the program, no longer running on my machine once around 15 games had been played.
-On the contrary, sticking to the use of static methods throughout the entirety of the program was ideal, as all of the methods simply get run through without objects being present to have to call them. This design allows for the simulation of hundreds of millions of games, which admittedly does take a few hours; precisely, the simulation of one million games of Blackjack proved to cost roughly 140 seconds.
+On the contrary, sticking to the use of static methods throughout the entirety of the program proved to be optimal, as all of the methods simply get run through without objects being present to have to call them. This design allows for the simulation of hundreds of millions of games, which admittedly does take a few hours; precisely, the simulation of one million games of Blackjack proved to cost roughly 140 seconds.
 Lastly, a point in my design which could be improved to potentially increase the win rate by a few hundredths of a percent is, when a card is taken out of the shoe, updating the dealer’s probabilities of ending with their different final total possibilities. This would have the effect of making the later calls of the methods more precise. However, like the incorporation of classes, this was too computationally expensive and would not be worth the tradeoff in regards to efficiency, especially considering that an advantage for the player is already present.

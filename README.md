@@ -4,14 +4,7 @@ I found the card game Blackjack to be a game with strategy straightforward enoug
 
 A basic set of rules for Blackjack can be found here: https://bicyclecards.com/how-to-play/blackjack/ 
 
-I chose to program a player for a Blackjack game with the following rules:
-One deck shoe
-Blackjack pays 3:2
-Dealer stands on soft 17
-No resplitting
-Double on any two cards
-Player can surrender after dealer checks for Blackjack
-Shuffle after every hand
+I chose to program a player for a Blackjack game with the following rules: One deck shoe, Blackjack pays 3:2, Dealer stands on soft 17, No resplitting, Double on any two cards, Player can surrender after dealer checks for Blackjack, and Shuffle after every hand.
 
 According to various online calculators of the win rate, the player will effectively win 50.08 percent of games, and using the algorithm that I developed from scratch, I managed to achieve that same win rate over the simulation of more than one billion games of Blackjack.
 

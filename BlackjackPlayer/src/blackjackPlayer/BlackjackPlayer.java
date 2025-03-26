@@ -366,8 +366,6 @@ public class BlackjackPlayer {
 		double[] playerProbs = BlackjackPlayer.getPlayerProbs(total, cardsLeft, 1.0, acePresent, 
 				new double[11], dealerProbs);
 		
-		
-		
 		// Finds the probability of the player winning while hitting
 		double winIfHit = BlackjackPlayer.playerWinProb(playerProbs, dealerProbs);
 			

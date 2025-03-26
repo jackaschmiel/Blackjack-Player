@@ -19,8 +19,15 @@ public class Blackjack {
 		// Stores how many decks of cards are in the shoe
 		int decks = 1;
 		
+		// -4 -3 -2 -1 -0.5 0 1 1.5 2 3 4 
+		int outcomeTotals[] = new int[11];
+		
 		// How many games the program will play
-		int iterations = 10000000;
+		int iterations = 10000;
+		
+		long elapsedTime = 0;
+		
+		long startTime = System.currentTimeMillis();
 
 		// Plays a game of Blackjack a given amount of times
 		for (int i = 0; i < iterations; i++) {
@@ -105,6 +112,9 @@ public class Blackjack {
 					// The player having Blackjack is checked for because neither the player or dealer 
 					// wins the hand if they both have Blackjack
 					difference--;
+					outcomeTotals[3]++;
+				} else {
+					outcomeTotals[5]++;
 				}
 				
 			} else if (playerBlackjack) {
@@ -112,6 +122,7 @@ public class Blackjack {
 				// player effectively wins the game plus half of another game, so the number tracking the
 				// difference in games won will now reflect that
 				difference += 1.5;
+				outcomeTotals[7]++;
 				
 			}
 
@@ -184,6 +195,8 @@ public class Blackjack {
 							dealerFirst == 11 || dealerSecond == 11, cardsLeft, trueCardsLeft);
 					
 					difference += split;
+					
+					incArr(outcomeTotals, split);
 
 					// The current simulation is ended, as the split method plays through the entire game
 					continue;
@@ -209,6 +222,7 @@ public class Blackjack {
 			// concluding the current game
 			if ((boolean)hitArray[4]) {
 				difference -= 0.5;
+				incArr(outcomeTotals, -0.5);
 				continue;
 			}
 
@@ -366,14 +380,24 @@ public class Blackjack {
 			}
 
 			// The difference gets added to it the result of this game
+			incArr(outcomeTotals, result);
 			difference += result;
+			
+			elapsedTime = System.currentTimeMillis() - startTime;
+			
+			
+			
 
 		}
 
+		printOutcomeTotals(outcomeTotals, iterations);
 		System.out.println("Games played: " + iterations);
+		System.out.println("Seconds elapsed: " + elapsedTime/1000);
+		System.out.println("Games per second: " + iterations / (double)((double)elapsedTime / 1000.0));
 		System.out.println("Win rate: " + ((iterations + difference) / 2) / iterations);
 		System.out.println("House edge: " + (100 * difference) / (-1 * iterations) + " percent");
 		System.out.println("Player edge: " + (100 * difference) / (1 * iterations) + " percent");
+		System.out.println("If one dollar were placed on each game, " + difference + " dollars would be made");
 
 	}
 	
@@ -430,8 +454,9 @@ public class Blackjack {
 			// value for this hand is final
 			if (num == 11) {
 				
-				arr[i] = value;
-				continue;
+				arr[0] = num1;
+				arr[1] = num2;
+				break;
 				
 			}
 
@@ -444,15 +469,17 @@ public class Blackjack {
 			// The index of the dealer's first card for when their value probabilities are needed to be
 			// found
 			int originalNum = dealerFirst - 10;
+			
+			// If the player's first card was an ace or they drew an ace in this hand. Essentially 
+			// stores whether the player has an ace whose value is 11
+			boolean playerHasAce = num == 11 || (i == 0 ? hit1 : hit2) == 1;
 
 			// Starts off by looking to see if the player should hit, leaving the loop if they shouldn't.
 			// But if they should, it will keep on looking to see if they should hit again until they
 			// shouldn't
 			do {
 
-				// If the player's first card was an ace or they drew an ace in this hand. Essentially 
-				// stores whether the player has an ace whose value is 11
-				boolean playerHasAce = num == 11 || (i == 0 ? hit1 : hit2) == 1;
+				
 
 				// The dealer's probabilities of ending with certain totals
 				double[] dealerProbs = BlackjackPlayer.getDealerProbs(dealerFirst, cardsLeft, 1, 
@@ -651,6 +678,46 @@ public class Blackjack {
 	public static void removeElements(int num, int[] cardsLeft) {
 		// If the value of the card which needs to be removed is 10, 1 is subtracted at the 0 index 
 		cardsLeft[num == 10 ? 0 : num]--;
+	}
+	
+	private static void incArr(int[] outcomeTotals, double result) {
+		if (result == -4) {
+			outcomeTotals[0]++;
+		} else if (result == -3) {
+			outcomeTotals[1]++;
+		} else if (result == -2) {
+			outcomeTotals[2]++;
+		} else if (result == -1) {
+			outcomeTotals[3]++;
+		} else if (result == -0.5) {
+			outcomeTotals[4]++;
+		} else if (result == 0) {
+			outcomeTotals[5]++;
+		} else if (result == 1) {
+			outcomeTotals[6]++;
+		} else if (result == 1.5) {
+			outcomeTotals[7]++;
+		} else if (result == 2) {
+			outcomeTotals[8]++;
+		} else if (result == 3) {
+			outcomeTotals[9]++;
+		} else if (result == 4) {
+			outcomeTotals[10]++;
+		}
+	}
+	
+	private static void printOutcomeTotals(int[] outcomeTotals, int iterations) {
+		System.out.printf("-4 %.10f\n", (double)((double)outcomeTotals[0] / iterations));
+		System.out.printf("-3 %.10f\n", (double)((double)outcomeTotals[1] / iterations));
+		System.out.printf("-2 %.10f\n", (double)((double)outcomeTotals[2] / iterations));
+		System.out.printf("-1 %.10f\n", (double)((double)outcomeTotals[3] / iterations));
+		System.out.printf("-0.5 %.10f\n", (double)((double)outcomeTotals[4] / iterations));
+		System.out.printf("0 %.10f\n", (double)((double)outcomeTotals[5] / iterations));
+		System.out.printf("1 %.10f\n", (double)((double)outcomeTotals[6] / iterations));
+		System.out.printf("1.5 %.10f\n", (double)((double)outcomeTotals[7] / iterations));
+		System.out.printf("2 %.10f\n", (double)((double)outcomeTotals[8] / iterations));
+		System.out.printf("3 %.10f\n", (double)((double)outcomeTotals[9] / iterations));
+		System.out.printf("4 %.10f\n", (double)((double)outcomeTotals[10] / iterations));
 	}
 	
 }

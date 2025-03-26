@@ -22,14 +22,14 @@ public class BlackjackPlayer {
 	public static double[] getDealerProbs(int dealer, int[] cardsLeft, 
 			double prob, boolean acePresent, int originalNum, double[] probs) {
 		
-		// This value will be the index that corresponds to the card whose possibility of the dealer
+		/* This value will be the index that corresponds to the card whose possibility of the dealer
 		// having as their down card, we do not need to account for. As an example, if the dealer's first 
 		// card had a value of 10, 0 would get argued for the originalNum parameter, setting newNum to 1, 
 		// the index of aces. We know that the dealer's down card is not an ace because they peeked for 
 		// Blackjack and if it was an ace, they would have gotten Blackjack and the point in the game 
 		// where this method was called would not have been reached. Also, as seen below, this number is 
 		// only relevant if it is 0 or 1, as Blackjack can only be achieved with a 10 or ace as the value
-		// of the first card.
+		// of the first card */
 		int impossibleIdx = 1 - originalNum;
 
 		// Stores the number of cards in the shoe that we know the dealer will not show or pull next.
@@ -273,7 +273,7 @@ public class BlackjackPlayer {
 				// If the player's total went over 21 in this current sequence, the last index of their
 				// array of probabilities gets added to it the probability of this current sequence of
 				// cards being drawn occurring
-				probs[10] += (double)cardsLeft[idx] / Blackjack.getSum(cardsLeft) * prob;
+				probs[10] += newProb;
 				
 			}
 		
@@ -365,6 +365,8 @@ public class BlackjackPlayer {
 		// Stores the probabilities of the player ending with the different possibilities of final totals
 		double[] playerProbs = BlackjackPlayer.getPlayerProbs(total, cardsLeft, 1.0, acePresent, 
 				new double[11], dealerProbs);
+		
+		
 		
 		// Finds the probability of the player winning while hitting
 		double winIfHit = BlackjackPlayer.playerWinProb(playerProbs, dealerProbs);
@@ -468,7 +470,7 @@ public class BlackjackPlayer {
 		
 		// The probability of the player winning is initialized as the probability of the dealer busting
 		// minus the probability of the player also busting
-        double playerWin = dealer[5] - (dealer[5] * player[10]);
+        double playerWin = dealer[5] * (1 - player[10]);
 		
         // Will store the probability of a push, or tie, taking place
 		double pushProb = 0.0;
@@ -514,42 +516,16 @@ public class BlackjackPlayer {
 	private static double winIfStand(int total, double[] dealerProbs) {
 		
 		// Will store the probability
-		double winIfStand = 0;
+		double winIfStand = dealerProbs[5];
 		
-		if (total < 17) {
-			
-			// The player will only win if the dealer busts
-			winIfStand = dealerProbs[5]; 
-			
-		} else if (total == 17) {
-			
-			// The players will tie if the dealer has 17 and win if they bust
-			winIfStand = (dealerProbs[0] / 2) + dealerProbs[5]; 
-			
-		} else if (total == 18) {
-			
-			// The players will tie if the dealer has 18 and win if they bust or have 17
-			winIfStand = dealerProbs[0] + (dealerProbs[1] / 2) + dealerProbs[5];
-			
-		} else if (total == 19) {
-			
-			// The players will tie if the dealer has 19 and win if they bust or have 17 or 18
-			winIfStand = dealerProbs[0] + dealerProbs[1] + (dealerProbs[2] / 2) + 
-					dealerProbs[5];
-			
-		} else if (total == 20) {
-			
-			// The players will tie if the dealer has 20 and win if they bust or have 17, 18, or 19
-			winIfStand = dealerProbs[0] + dealerProbs[1] + dealerProbs[2] + 
-					(dealerProbs[3] / 2) + dealerProbs[5];
-			
-		} else if (total == 21) {
-			
-			// The players will tie if the dealer has 21 and win if they bust or have 17, 18, 19, or 20
-			winIfStand = dealerProbs[0] + dealerProbs[1] + dealerProbs[2] + 
-					dealerProbs[3] + (dealerProbs[4] / 2) + dealerProbs[5];
-			
+		if (total >= 17) {
+			winIfStand += (dealerProbs[total - 17] / 2);
+			for (int currTot = total; currTot > 17; currTot--) {
+				winIfStand += dealerProbs[currTot - 18];
+			}
 		}
+		
+		
 		
 		return winIfStand;
 		

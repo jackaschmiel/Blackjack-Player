@@ -1,5 +1,7 @@
 package blackjackPlayer;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 /* The purpose of this class is simply to run a Blackjack game a certain number of times, which a user can
@@ -19,7 +21,8 @@ public class Blackjack {
 		// Stores how many decks of cards are in the shoe
 		int decks = 1;
 		
-		// -4 -3 -2 -1 -0.5 0 1 1.5 2 3 4 
+		// This will store how many games ended in the player gaining the following numbers of value, 
+		// relative to the size of their initial wager, in this order: [-4 -3 -2 -1 -0.5 0 1 1.5 2 3 4]
 		int outcomeTotals[] = new int[11];
 		
 		// How many games the program will play
@@ -123,7 +126,6 @@ public class Blackjack {
 				// difference in games won will now reflect that
 				difference += 1.5;
 				outcomeTotals[7]++;
-				
 			}
 
 			// Goes to the next game if Blackjack is found
@@ -193,9 +195,7 @@ public class Blackjack {
 					// played once the player split
 					double split = Blackjack.split(playerTotal / 2, dealerFirst, dealerSecond, 
 							dealerFirst == 11 || dealerSecond == 11, cardsLeft, trueCardsLeft);
-					
 					difference += split;
-					
 					incArr(outcomeTotals, split);
 
 					// The current simulation is ended, as the split method plays through the entire game
@@ -226,11 +226,9 @@ public class Blackjack {
 				continue;
 			}
 
-			
 			// A do-while loop which checks to see if the player should hit and double, doing so if it is
 			// supposed to. Will be broken out of if the player shouldn't and therefore does not hit.
 			do {
-
 				// If the hand is not doublable, meaning it has already been hit on, the hit array is 
 				// again found with the updated player total. 
 				if (!doublable) {
@@ -244,8 +242,6 @@ public class Blackjack {
 					hitArray = BlackjackPlayer.shouldHit(playerTotal, newDealerProbs, playerHasAce, cardsLeft);
 					
 				}
-				
-				
 
 				// If the player should hit, they hit.
 				if ((boolean) hitArray[0]) {
@@ -275,7 +271,6 @@ public class Blackjack {
 						playerHasAce = false;
 					}
 
-					
 					if (playerTotal > 21) {
 						playerBusted = true;
 						break;
@@ -284,7 +279,6 @@ public class Blackjack {
 						break;
 					}
 					
-
 					// If the player doubles, they cannot hit again
 					if (doubled) {
 						break;
@@ -371,7 +365,6 @@ public class Blackjack {
 			// Otherwise, if the dealer's total is greater than the player's, the dealer wins
 			} else if (dealerTotal > playerTotal) {
 				result--;
-				
 			} 
 			
 			// If the player doubled the stakes of the game
@@ -383,6 +376,8 @@ public class Blackjack {
 			incArr(outcomeTotals, result);
 			difference += result;
 			
+			// How much time has elapsed, in milliseconds, since the program was initially run. Used to 
+			// see its efficiency
 			elapsedTime = System.currentTimeMillis() - startTime;
 			
 			
@@ -390,6 +385,7 @@ public class Blackjack {
 
 		}
 
+		// Printing details about the simulation
 		printOutcomeTotals(outcomeTotals, iterations);
 		System.out.println("Games played: " + iterations);
 		System.out.println("Seconds elapsed: " + elapsedTime/1000);
@@ -453,7 +449,6 @@ public class Blackjack {
 			// to hit a split ace after the original hit. So, this will conclude and the player's current
 			// value for this hand is final
 			if (num == 11) {
-				
 				arr[0] = num1;
 				arr[1] = num2;
 				break;
@@ -591,21 +586,17 @@ public class Blackjack {
 			
 			// If the player busted or went over 21, they lost the hand
 			if (arr[i] > 21) {
-
 				result -= (doubled ? 2 : 1);
 
 			} else if (dealerTot > 21) {
-
 				// Otherwise, if the dealer busted, the player wins
 				result += (doubled ? 2 : 1);
 
 			} else if (arr[i] > dealerTot) {
-
 				// If the player's total is greater than the dealer's
 				result += (doubled ? 2 : 1);
 
 			} else if (arr[i] < dealerTot) {
-
 				// If the dealer's total is greater than the player's
 				result -= (doubled ? 2 : 1);
 
@@ -645,11 +636,8 @@ public class Blackjack {
 		int sum = 0;
 		// Loops through all of the numbers, adding them together
 		for (int i = 0; i < arr.length; i++) {
-			
 			sum += arr[i];
-			
 		}
-		
 		return sum;
 	}
 
@@ -681,29 +669,13 @@ public class Blackjack {
 	}
 	
 	private static void incArr(int[] outcomeTotals, double result) {
-		if (result == -4) {
-			outcomeTotals[0]++;
-		} else if (result == -3) {
-			outcomeTotals[1]++;
-		} else if (result == -2) {
-			outcomeTotals[2]++;
-		} else if (result == -1) {
-			outcomeTotals[3]++;
-		} else if (result == -0.5) {
-			outcomeTotals[4]++;
-		} else if (result == 0) {
-			outcomeTotals[5]++;
-		} else if (result == 1) {
-			outcomeTotals[6]++;
-		} else if (result == 1.5) {
-			outcomeTotals[7]++;
-		} else if (result == 2) {
-			outcomeTotals[8]++;
-		} else if (result == 3) {
-			outcomeTotals[9]++;
-		} else if (result == 4) {
-			outcomeTotals[10]++;
-		}
+		Map<Double, Integer> resultToIdx = Map.ofEntries(
+				Map.entry(-4.0, 0), Map.entry(-3.0, 1), Map.entry(-2.0, 2), Map.entry(-1.0,  3), 
+				Map.entry(-0.5, 4), Map.entry(0.0, 5), Map.entry(1.0, 6), Map.entry(1.5, 7), Map.entry(2.0, 8),
+				Map.entry(3.0, 9), Map.entry(4.0, 10)); 
+		
+		outcomeTotals[resultToIdx.get(result)]++;		
+		
 	}
 	
 	private static void printOutcomeTotals(int[] outcomeTotals, int iterations) {

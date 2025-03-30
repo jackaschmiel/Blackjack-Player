@@ -2,12 +2,10 @@ package blackjackPlayer;
 
 public class printTable {
 	
-	static int playerProbs[];
-	static int dealerProbs[];
+	/* This method will print out the current probability distribution of the totals the player and dealer
+	 * could finish with. It is used in the shouldHitAux method from the BlackjackPlayer class. */
 	
-
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+	public static void tablePrint(double[] playerProbs, double[] dealerProbs) {
 		System.out.print("  Player |      17 |      18 |      19 |      20 |      21 |    Bust |   Total |");
 		System.out.println("\n--------------------------------------------------------------------------------");
 		for (int i = 0; i < 11; i++) {
@@ -29,4 +27,9 @@ public class printTable {
 		System.out.println("\n\n\n\n\n\n\n\n\n");
 	}
 
+	
 }
+	
+
+	
+

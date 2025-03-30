@@ -366,9 +366,18 @@ public class BlackjackPlayer {
 		double[] playerProbs = BlackjackPlayer.getPlayerProbs(total, cardsLeft, 1.0, acePresent, 
 				new double[11], dealerProbs);
 		
+		// If using printTable to see joint probability distribution for if the player were to hit,
+		// put the line "printTable.tablePrint(playerProbs, dealerProbs);" right below this comment.
+		// Recommendation: Only do this for when one game is being ran. If one wants to see the joint PMF,
+		// that should be the only concern for the simulation, as the result of one singular game is not
+		// at all indicative of how the optimization performs over large numbers of games.
+		// The printing of the tables will slow down the code tremendously, and there will be too many 
+		// tables to observe if the number of games is really any larger than just one.
+		
+		
 		// Finds the probability of the player winning while hitting
 		double winIfHit = BlackjackPlayer.playerWinProb(playerProbs, dealerProbs);
-			
+		
 		// If the player is more likely to win the game by hitting than they are standing, then they
 		// should hit. Otherwise, they shouldn't
 		shouldHit = winIfHit > winIfStand;
@@ -522,8 +531,6 @@ public class BlackjackPlayer {
 				winIfStand += dealerProbs[currTot - 18];
 			}
 		}
-		
-		
 		
 		return winIfStand;
 		

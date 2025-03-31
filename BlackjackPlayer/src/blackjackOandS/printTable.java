@@ -1,4 +1,4 @@
-package blackjackPlayer;
+package blackjackOandS;
 
 public class printTable {
 	

@@ -1,6 +1,5 @@
-package blackjackPlayer;
+package blackjackOandS;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -10,8 +9,8 @@ import java.util.Random;
  * continuing to draw cards until the total value of their cards reaches at least 17, but the player who is
  * challenging the dealer has a variety of decisions to choose from, such as hitting, standing, doubling,
  * splitting if their first two cards are the same value, and surrendering. The methods in the 
- * BlackjackPlayer class will determine the decisions that this program makes. */
-public class Blackjack {
+ * BlackjackOptimization class will determine the decisions that this program makes. */
+public class BlackjackSimulation {
 
 	public static void main(String[] args) {
 
@@ -26,7 +25,7 @@ public class Blackjack {
 		int outcomeTotals[] = new int[11];
 		
 		// How many games the program will play
-		int iterations = 10000;
+		int iterations = 1000;
 		
 		long elapsedTime = 0;
 		
@@ -82,7 +81,7 @@ public class Blackjack {
 			int[] cardsLeft = trueCardsLeft.clone();
 
 			// Gets the dealer's second card
-			int dealerSecond = Blackjack.hit(trueCardsLeft);
+			int dealerSecond = hit(trueCardsLeft);
 
 			// If it is an ace and the dealer does not already have an ace. While the player should not
 			// know if the dealer's second card is an ace, the "dealerHasAce" boolean is not used until
@@ -147,7 +146,7 @@ public class Blackjack {
 			int dealerOrig = dealerFirst - 10;
 			
 			// Will store the probabilities of the dealer finishing with 17, 18, 19, 20, 21, or over 21.
-			double[] dealerProbs = BlackjackPlayer.getDealerProbs(dealerFirst, cardsLeft, 1, 
+			double[] dealerProbs = BlackjackOptimization.getDealerProbs(dealerFirst, cardsLeft, 1, 
 							dealerFirst == 11, dealerOrig, new double[6]);
 			
 			// Stores, in order, whether the player should hit, if they should double the stakes of the 
@@ -157,7 +156,7 @@ public class Blackjack {
 			// The method takes in as parameters the player's total, the dealer's probabilities of 
 			// finishing with different totals, the player's projected total, whether the player has an 
 			// ace, and the array of cards available to draw from.
-			Object[] hitArray = BlackjackPlayer.shouldHit(playerTotal, dealerProbs, playerHasAce, cardsLeft);
+			Object[] hitArray = BlackjackOptimization.shouldHit(playerTotal, dealerProbs, playerHasAce, cardsLeft);
 			
 			// If the player can split their hand
 			if (splittable) {
@@ -170,11 +169,11 @@ public class Blackjack {
 				
 				// Stores, if the player were to split, the probabilities of them finishing with 12, 13,
 				// 14...20, 21, and over 21.
-				double[] splitPlayerProbs = BlackjackPlayer.getPlayerProbs(playerTotal / 2, 
+				double[] splitPlayerProbs = BlackjackOptimization.getPlayerProbs(playerTotal / 2, 
 						cardsLeft, 1.0, playerHasAce, new double[11], dealerProbs);
 				
 				// Stores the probability of the player winning if they chose to split
-				double winIfSplit = BlackjackPlayer.playerWinProb(splitPlayerProbs, dealerProbs);
+				double winIfSplit = BlackjackOptimization.playerWinProb(splitPlayerProbs, dealerProbs);
 				
 				// Stores the probability of the player winning by finding the higher likelihood between
 				// winning if they stand and winning if they hit. The boolean at the 0 index of the 
@@ -183,17 +182,17 @@ public class Blackjack {
 				
 				// Stores the expected difference in games won between the player and dealer if the player
 				// elects not to split
-				double noSplitEV = BlackjackPlayer.getExpectedValue(winProb);
+				double noSplitEV = BlackjackOptimization.getExpectedValue(winProb);
 				// Stores that same expected difference, if the player were to split. Multiplied by two
 				// because the player is now playing two hands
-				double splitEV = 2 * BlackjackPlayer.getExpectedValue(winIfSplit);				
+				double splitEV = 2 * BlackjackOptimization.getExpectedValue(winIfSplit);				
 				// If the player will benefit more from splitting than not splitting, they split
 				if (splitEV > noSplitEV) {
 					
 					// The difference will get added to it the result of the hand being split, a method 
 					// that returns the difference in effective games won between the hands that were
 					// played once the player split
-					double split = Blackjack.split(playerTotal / 2, dealerFirst, dealerSecond, 
+					double split = split(playerTotal / 2, dealerFirst, dealerSecond, 
 							dealerFirst == 11 || dealerSecond == 11, cardsLeft, trueCardsLeft);
 					difference += split;
 					incArr(outcomeTotals, split);
@@ -235,11 +234,11 @@ public class Blackjack {
 					// Stores the dealer's updated probabilities with the new cardsLeft array, as it has
 					// been altered with the player drawing another card, and the player still does not
 					// know the value of the dealer's second card
-					double[] newDealerProbs = BlackjackPlayer.getDealerProbs(dealerFirst, cardsLeft, 
+					double[] newDealerProbs = BlackjackOptimization.getDealerProbs(dealerFirst, cardsLeft, 
 							1, dealerFirst == 11, dealerOrig, new double[6]);
 					
 					// Updates the array with the player's new total and the dealer's new probabilities
-					hitArray = BlackjackPlayer.shouldHit(playerTotal, newDealerProbs, playerHasAce, cardsLeft);
+					hitArray = BlackjackOptimization.shouldHit(playerTotal, newDealerProbs, playerHasAce, cardsLeft);
 					
 				}
 
@@ -247,8 +246,8 @@ public class Blackjack {
 				if ((boolean) hitArray[0]) {
 
 					// Stores the next card
-					int nextCard = Blackjack.hit(trueCardsLeft);
-					Blackjack.removeElements(nextCard, cardsLeft);
+					int nextCard = hit(trueCardsLeft);
+					removeElements(nextCard, cardsLeft);
 
 					// If the player should double and the hand is doublable
 					if ((boolean) hitArray[1] && doublable) {
@@ -318,7 +317,7 @@ public class Blackjack {
 				}
 
 				// Gets the next card for the dealer
-				int nextCard = Blackjack.hit(trueCardsLeft);
+				int nextCard = hit(trueCardsLeft);
 
 				// If it is equal to one and the dealer does not yet have an ace, the ace's value is 11
 				if (nextCard == 1 && !dealerHasAce) {
@@ -477,12 +476,12 @@ public class Blackjack {
 				
 
 				// The dealer's probabilities of ending with certain totals
-				double[] dealerProbs = BlackjackPlayer.getDealerProbs(dealerFirst, cardsLeft, 1, 
+				double[] dealerProbs = BlackjackOptimization.getDealerProbs(dealerFirst, cardsLeft, 1, 
 						dealerFirst == 11, originalNum, new double[6]);
 				
 				// Stores information about the player's best decisions to make in this current 
 				// situation
-				Object[] hitArray = BlackjackPlayer.shouldHit(value, dealerProbs, playerHasAce, cardsLeft);
+				Object[] hitArray = BlackjackOptimization.shouldHit(value, dealerProbs, playerHasAce, cardsLeft);
 
 				// If the player should hit
 				if ((boolean)hitArray[0]) {
@@ -668,12 +667,12 @@ public class Blackjack {
 		cardsLeft[num == 10 ? 0 : num]--;
 	}
 	
+	private static Map<Double, Integer> resultToIdx = Map.ofEntries(
+			Map.entry(-4.0, 0), Map.entry(-3.0, 1), Map.entry(-2.0, 2), Map.entry(-1.0,  3), 
+			Map.entry(-0.5, 4), Map.entry(0.0, 5), Map.entry(1.0, 6), Map.entry(1.5, 7), Map.entry(2.0, 8),
+			Map.entry(3.0, 9), Map.entry(4.0, 10)); 
+	
 	private static void incArr(int[] outcomeTotals, double result) {
-		Map<Double, Integer> resultToIdx = Map.ofEntries(
-				Map.entry(-4.0, 0), Map.entry(-3.0, 1), Map.entry(-2.0, 2), Map.entry(-1.0,  3), 
-				Map.entry(-0.5, 4), Map.entry(0.0, 5), Map.entry(1.0, 6), Map.entry(1.5, 7), Map.entry(2.0, 8),
-				Map.entry(3.0, 9), Map.entry(4.0, 10)); 
-		
 		outcomeTotals[resultToIdx.get(result)]++;		
 		
 	}

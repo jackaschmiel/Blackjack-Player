@@ -1,9 +1,9 @@
-package blackjackPlayer;
+package blackjackOandS;
 
 /* This class consists of methods which will assist in making decisions during a Blackjack
  * in order to optimize a player's chances of winning. */
 
-public class BlackjackPlayer {
+public class BlackjackOptimization {
 	
 	/* This method returns an array of the probabilities the dealer could finish with, in order by index,
 	 * 17, 18, 19, 20, 21, and over 21 (busted). It takes in as parameters the dealer's current total, the
@@ -43,7 +43,7 @@ public class BlackjackPlayer {
 		// this, 2 is argued as originalNum when the dealer hits and this method is called recursively so
 		// that numsWillNotPull will go to 0 and cardsThatCouldBeShown is equal to all of the cards left 
 		// in the shoe.
-		int cardsThatCouldBeShown = Blackjack.getSum(cardsLeft) - numsWillNotPull;
+		int cardsThatCouldBeShown = BlackjackSimulation.getSum(cardsLeft) - numsWillNotPull;
 		
 		// Loops through all of the differently valued cards for the sake of seeing the result if that card
 		// is the next card dealt to the dealer.
@@ -237,7 +237,7 @@ public class BlackjackPlayer {
 			// divided by the cards the dealer could show, and multiplies this by the probability that 
 			// the current call of the method took place, AKA the probability that the previous card was
 			// pulled at the time that it was.
-			double newProb = (double) cardsLeft[idx] / Blackjack.getSum(cardsLeft) * prob;
+			double newProb = (double) cardsLeft[idx] / BlackjackSimulation.getSum(cardsLeft) * prob;
 			
 			// If the player's total will not reach 12, the method is called recursively for the updated
 			// total
@@ -307,10 +307,10 @@ public class BlackjackPlayer {
 		// If the player chooses to double their bet, they cannot draw more than the one card given to
 		// them after they make this decision. The getDoubledPlayerProbs method accounts for this and
 		// this variable will store the probabilities of finishing with different values after doubling
-		double[] doubledPlayerProbs = BlackjackPlayer.getDoubledPlayerProbs(total, acePresent, cardsLeft);
+		double[] doubledPlayerProbs = getDoubledPlayerProbs(total, acePresent, cardsLeft);
 		
 		// Stores the probability of the player winning if they choose to double
-		double winIfHitOnce = BlackjackPlayer.playerWinProb(doubledPlayerProbs, dealerProbs);
+		double winIfHitOnce = playerWinProb(doubledPlayerProbs, dealerProbs);
 
 		// These store the effective hypothetical amount of games won for different decisions
 		double doubleEV = 2 * getExpectedValue(winIfHitOnce);
@@ -363,7 +363,7 @@ public class BlackjackPlayer {
 		double winIfStand = winIfStand(total, dealerProbs);
 		
 		// Stores the probabilities of the player ending with the different possibilities of final totals
-		double[] playerProbs = BlackjackPlayer.getPlayerProbs(total, cardsLeft, 1.0, acePresent, 
+		double[] playerProbs = getPlayerProbs(total, cardsLeft, 1.0, acePresent, 
 				new double[11], dealerProbs);
 		
 		// If using printTable to see joint probability distribution for if the player were to hit,
@@ -376,7 +376,7 @@ public class BlackjackPlayer {
 		
 		
 		// Finds the probability of the player winning while hitting
-		double winIfHit = BlackjackPlayer.playerWinProb(playerProbs, dealerProbs);
+		double winIfHit = playerWinProb(playerProbs, dealerProbs);
 		
 		// If the player is more likely to win the game by hitting than they are standing, then they
 		// should hit. Otherwise, they shouldn't
@@ -444,7 +444,7 @@ public class BlackjackPlayer {
 			}
 			
 			// Stores the probability that the current card was pulled
-			double newProb = (double) cardsLeft[i] / Blackjack.getSum(cardsLeft);
+			double newProb = (double) cardsLeft[i] / BlackjackSimulation.getSum(cardsLeft);
 			
 			// Looks at different totals that the player could end with
 			if (newTotal <= 12) {

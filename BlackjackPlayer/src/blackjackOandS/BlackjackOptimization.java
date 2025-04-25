@@ -1,7 +1,8 @@
 package blackjackOandS;
 
-/* This class consists of methods which will assist in making decisions during a Blackjack
- * in order to optimize a player's chances of winning. */
+/* This class consists of methods that will assist in making decisions during a Blackjack
+ * in order to optimize a player's chances of winning. 
+ * It has 8 methods and 114 logical lines of code (LOC). */
 
 public class BlackjackOptimization {
 	
@@ -10,28 +11,18 @@ public class BlackjackOptimization {
 	/* This method returns an array of the probabilities the dealer could finish with, in order by index,
 	 * 17, 18, 19, 20, 21, and over 21 (busted). It takes in as parameters the dealer's current total, the
 	 * array of cards left to draw from, the probability that this current call of the method occurs,
-	 * whether the dealer has an ace, a number representing the dealer's first card (0 for 10, 1 for ace) 
-	 * and the array which will store the probabilities that will then be returned, which, when this 
-	 * method is originally called, will always be a new, empty array so that the numbers in the array
-	 * add up to one when the method has fully ran through. 
+	 * whether the dealer has an ace, and the array which will store the probabilities that will then be 
+	 * returned, which, when this  method is originally called, will always be a new, empty array so that
+	 * the numbers in the array add up to one when the method has fully ran through. 
 	 * What this method will do is loop through all of the values of cards in the shoe, checking the value
 	 * of the dealer's hand if they were to get a card with each value. If it is at least 17, the "probs"
 	 * array will get added to it the probability that the dealer ends with whatever number they end with.
 	 * If it is less than 17, the method will be called again with that sub-17 number as the argument for
 	 * the "total" parameter, while arguing the probability that the previous card was pulled for the
-	 * "prob" parameter, made effective by the "newProb" local variable always being multiplied by the
-	 * argument for "prob". */
+	 * "prob" parameter, made effective by the "totalProb" local variable always being multiplied by the
+	 * argument for "prob". (30 logical LOC) */
 	public static double[] getDealerProbs(int dealer, int[] cardsLeft, 
 			double prob, boolean acePresent, double[] probs) {
-		
-		/* This value will be the index that corresponds to the card whose possibility of the dealer
-		// having as their down card, we do not need to account for. As an example, if the dealer's first 
-		// card had a value of 10, 0 would get argued for the originalNum parameter, setting newNum to 1, 
-		// the index of aces. We know that the dealer's down card is not an ace because they peeked for 
-		// Blackjack and if it was an ace, they would have gotten Blackjack and the point in the game 
-		// where this method was called would not have been reached. Also, as seen below, this number is 
-		// only relevant if it is 0 or 1, as Blackjack can only be achieved with a 10 or ace as the value
-		// of the first card */
 		
 		/* This will store the number of possible cards that the dealer could have as the next card that
 		 * they could have. For now, and in most cases, it will equal the number of cards left in the
@@ -47,7 +38,7 @@ public class BlackjackOptimization {
 		 * result in the dealer checking to see if their down card is an ace; if it is, they would have
 		 * Blackjack, so if they don't have Blackjack, we rule out the possibility of the down card being 
 		 * an ace. The same goes for an up card of ace, and ruling out the down card having a value of 10.
-		 * The mod operator was used above as a convenient way to find this index, and stored in a variable
+		 * The mod operator is used as a convenient way to find this index, and stored in a variable
 		 * as it will be used inside the loop. */
 		if (prob == 1.0 && dealer > 9) {
 			ruledOutIdx = 11 % dealer; // Index of value we rule out; only effective if 0 or 1
@@ -81,19 +72,9 @@ public class BlackjackOptimization {
 			// Sets the dealer's current number back to the number which was the argument for the dealer 
 			// parameter, as it can and will be changed during the iterations
 			int newDealer = dealer;
-			
-			// Creates a new array of the remaining cards which is just a copy of the parameter argument, 
-			// so that the array can be altered within this iteration of the loop but then set back to 
-			// its initial state for the next iteration.
-			int[] newArray = cardsLeft.clone();
-			
-			// Since the card being pulled corresponds to the current index in the loop, a card needs to 
-			// be taken away, but only if there are any cards remaining at the index. If there aren't any
-			// cards of the value which the current index corresponds to, the next card will be looked at
-			// and this iteration will be terminated.
-			if (newArray[idx] > 0) {
-				newArray[idx]--;
-			} else {
+		
+			// If there are no cards left at this index, we don't even look at it
+			if (cardsLeft[idx] == 0) {
 				continue;
 			}
 			
@@ -121,15 +102,21 @@ public class BlackjackOptimization {
 			// the current one was drawn.
 			double currProb = (double) cardsLeft[idx] * totalProb;
 			
-			
 			// If the total will not reach 17, the method is called recursively for the new total
 			if (dealerTotal < 17) {
+				
+				// Temporarily decrement the number of cards left of the current value, for the purpose of 
+				// it being the array of cards left in the recursive call
+				cardsLeft[idx]--;
 				
 				// Finds the probabilities of the dealer ending with different totals after showing the
 				// card corresponding to the current index. Also argues the new, copied array, which had
 				// removed from it the card the dealer showed and also argues the above mentioned 
 				// probability.
-				getDealerProbs(dealerTotal, newArray, currProb, hasAce, probs);
+				getDealerProbs(dealerTotal, cardsLeft, currProb, hasAce, probs);
+				
+				// Increment it back for the next iteration of the loop
+				cardsLeft[idx]++;
 				
 			} else if (dealerTotal < 22) {
 				
@@ -150,6 +137,7 @@ public class BlackjackOptimization {
 				
 			}
 			
+			
 		}
 		
 		return probs;
@@ -167,7 +155,7 @@ public class BlackjackOptimization {
 	 * calling the method again if their total is at least 19, or 17 without an ace. However, in between
 	 * 12 and whichever upper threshold is used, we check if the player should hit again, recursively 
 	 * calling this method if so. But if not, we add to the player's "probs" array the probability of
-	 * them ending with whatever total it is. */
+	 * them ending with whatever total it is. (25 logical LOC) */
 	public static double[] getPlayerProbs(int total, int[] cardsLeft, double prob, 
 			boolean acePresent, double[] probs, double[] dealerProbs) {
 		
@@ -189,18 +177,8 @@ public class BlackjackOptimization {
 			// parameter, as it can and will be changed during the iterations
 			int newTotal = total;
 			
-			// Creates a new array of the remaining cards which is just a copy of the parameter argument,
-			// so that the array can be altered within this iteration of the loop but then set back to
-			// its initial state for the next iteration.
-			int[] newArray = cardsLeft.clone();
-
-			// Since the card being pulled corresponds to the current index in the loop, a card needs to
-			// be taken away, but only if there are any cards remaining at the index. If there aren't any
-			// cards of the value which the current index corresponds to, the next card will be looked at
-			// and this iteration will be terminated.
-			if (newArray[idx] > 0) {
-				newArray[idx]--;
-			} else {
+			// If there are no cards left at this index, we don't even look at it
+			if (cardsLeft[idx] == 0) {
 				continue;
 			}
 			
@@ -228,11 +206,15 @@ public class BlackjackOptimization {
 			// pulled at the time that it was.
 			double newProb = (double) cardsLeft[idx] * totalProb;
 			
+			// Temporarily decrement the number of cards left of the current value, for the purpose of 
+			// it being the array of cards left in the recursive call and the shouldHitAux method
+			cardsLeft[idx]--;
+			
 			// If the player's total will not reach 12, the method is called recursively for the updated
 			// total
 			if (playerTotal < 12) {
 				
-				getPlayerProbs(playerTotal, newArray, newProb, hasAce, probs, dealerProbs);
+				getPlayerProbs(playerTotal, cardsLeft, newProb, hasAce, probs, dealerProbs);
 				
 			} else if (playerTotal < 22) {
 				
@@ -242,14 +224,14 @@ public class BlackjackOptimization {
 				// of this sequence to the player's array of probabilities. We also do this if we end up
 				// checking to see if the player should hit but they shouldn't.
 				if (playerTotal > 18 || (playerTotal > 16 && !hasAce) || 
-						! (boolean) shouldHitAux(playerTotal, dealerProbs, hasAce, newArray)[0]) {
+						! (boolean) shouldHitAux(playerTotal, dealerProbs, hasAce, cardsLeft)[0]) {
 					
 					probs[playerTotal - 12] += newProb;
 					
 				} else {
 					// If the player should hit again, this adds the probabilities of them ending with
 			    	// different totals after hitting, to the probabilities-storing array
-					getPlayerProbs(playerTotal, newArray, newProb, hasAce, probs, dealerProbs);
+					getPlayerProbs(playerTotal, cardsLeft, newProb, hasAce, probs, dealerProbs);
 
 				}
 			} else {
@@ -260,6 +242,9 @@ public class BlackjackOptimization {
 				probs[10] += newProb;
 				
 			}
+			
+			// Increment back for the next iteration of the loop
+			cardsLeft[idx]++;
 		
 		}
 		
@@ -272,7 +257,7 @@ public class BlackjackOptimization {
 	 * should double, their probability of winning while drawing another card, their probability of
 	 * winning while not drawing another card, and whether they should surrender the hand.
      * Takes in parameters of the player's current total, the probabilities of the dealer ending with 
-     * different valyes, whether the player has an ace, and the array of cards remaining. */
+     * different valyes, whether the player has an ace, and the array of cards remaining. (17 logical LOC) */
 	public static Object[] shouldHit(int total, double[] dealerProbs, boolean acePresent, 
 			int[] cardsLeft) {
 		
@@ -335,7 +320,7 @@ public class BlackjackOptimization {
 	 * values found in this method, which is why the return type here is an array of objects.
 	 * The algorithm used is rather straightforward; if the player's probability of winning while hitting
 	 * is greater than their probability of winning while standing, then they should hit, and they should
-	 * not hit otherwise. */
+	 * not hit otherwise. (6 logical LOC) */
 	private static Object[] shouldHitAux(int total, double[] dealerProbs, boolean acePresent, 
 			int[] cardsLeft) {
 		
@@ -381,7 +366,7 @@ public class BlackjackOptimization {
 	 * cards in the shoe.
 	 * The process used here is rather simple due to the impossibility of hitting again. We simply add to
 	 * the probability of ending with a certain total the probability that we draw a card that puts us at
-	 * that total. */
+	 * that total. (20 logical LOC) */
 	private static double[] getDoubledPlayerProbs(int total, boolean acePresent, int[] cardsLeft) {
 		
 		// Will store the probabilities
@@ -442,7 +427,7 @@ public class BlackjackOptimization {
 	 * greater, and accumulate the probbabilities of all of these combinations occurring. Additionally,
 	 * because the two players ending the game with the same values has the effect of each of them winning
 	 * half of the game, we add half of the probability of them tying to the probability of the player
-	 * winning. */
+	 * winning. (8 logical LOC) */
 	public static double playerWinProb(double[] player, double[] dealer) {
 		
 		// The probability of the player winning is initialized as the probability of the dealer busting
@@ -489,7 +474,8 @@ public class BlackjackOptimization {
 	 * dealer's. Also, because the player and dealer ending with the same total results in each of them
 	 * effectively winning half of the game, we add half of the probability of them ending with the same
 	 * total to the variable that stores the win probability.
-	 * The dealer's 0 index corresponds to 17, 1 to 18, 2 to 19, 3 to 20, 4 to 21, and 5 to busting. */
+	 * The dealer's 0 index corresponds to 17, 1 to 18, 2 to 19, 3 to 20, 4 to 21, and 5 to busting. 
+	 * (6 logical LOC) */
 	private static double winIfStand(int total, double[] dealerProbs) {
 		
 		// Will store the probability
@@ -508,7 +494,7 @@ public class BlackjackOptimization {
 	
 
 	/* This method will simply return the expected difference in games won between the player and the 
-	 * dealer. This probability is the only parameter for this method. */
+	 * dealer. This probability is the only parameter for this method. (1 logical LOC) */
 	public static double getExpectedValue(double prob) {
 		
 		// Essentially takes the probability of the player winning and subtracts from it the possibility 

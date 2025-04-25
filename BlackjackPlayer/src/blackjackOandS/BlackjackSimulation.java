@@ -25,7 +25,7 @@ public class BlackjackSimulation {
 		int outcomeTotals[] = new int[11];
 		
 		// How many games the program will play
-		int iterations = 25000000;
+		int iterations = 1000000;
 		
 		long elapsedTime = 0;
 		

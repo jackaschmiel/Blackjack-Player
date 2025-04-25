@@ -5,6 +5,8 @@ package blackjackOandS;
 
 public class BlackjackOptimization {
 	
+	public static int[] idxToVal = { 10, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	
 	/* This method returns an array of the probabilities the dealer could finish with, in order by index,
 	 * 17, 18, 19, 20, 21, and over 21 (busted). It takes in as parameters the dealer's current total, the
 	 * array of cards left to draw from, the probability that this current call of the method occurs,
@@ -20,7 +22,7 @@ public class BlackjackOptimization {
 	 * "prob" parameter, made effective by the "newProb" local variable always being multiplied by the
 	 * argument for "prob". */
 	public static double[] getDealerProbs(int dealer, int[] cardsLeft, 
-			double prob, boolean acePresent, int originalNum, double[] probs) {
+			double prob, boolean acePresent, double[] probs) {
 		
 		/* This value will be the index that corresponds to the card whose possibility of the dealer
 		// having as their down card, we do not need to account for. As an example, if the dealer's first 
@@ -30,20 +32,33 @@ public class BlackjackOptimization {
 		// where this method was called would not have been reached. Also, as seen below, this number is 
 		// only relevant if it is 0 or 1, as Blackjack can only be achieved with a 10 or ace as the value
 		// of the first card */
-		int impossibleIdx = 1 - originalNum;
-
-		// Stores the number of cards in the shoe that we know the dealer will not show or pull next.
-		// This will be subtracted from the number of total cards which could next be shown by the dealer.
-		int numsWillNotPull = (impossibleIdx == 0 || impossibleIdx == 1) ? cardsLeft[impossibleIdx] : 0;
-
-		// This is the number of cards that the dealer could show, which is all of the cards left in
-		// the shoe minus the number of cards we know the dealer will not show. When the dealer hits
-		// again after showing their down card, all of the cards in the shoe need to be accounted for,
-		// since it is being taken directly out of the shoe rather than being flipped over. Because of 
-		// this, 2 is argued as originalNum when the dealer hits and this method is called recursively so
-		// that numsWillNotPull will go to 0 and cardsThatCouldBeShown is equal to all of the cards left 
-		// in the shoe.
-		int cardsThatCouldBeShown = BlackjackSimulation.getSum(cardsLeft) - numsWillNotPull;
+		
+		/* This will store the number of possible cards that the dealer could have as the next card that
+		 * they could have. For now, and in most cases, it will equal the number of cards left in the
+		 * shoe, but that may change as seen right below. */
+		int cardsPossible = BlackjackSimulation.getSum(cardsLeft);
+		
+		
+		int ruledOutIdx = 2;
+		/* If this is the first call to this method, 1 will be argued for the "prob" parameter, and in that
+		 * case, if the dealer's up card is worth 10 or is an ace, we know that the down card is not an ace
+		 * or worth 10, respectively, as they peeked for Blackjack and this point in the game would not
+		 * be reached if either of those possibilities were fulfilled. For example, an up card of 10 would
+		 * result in the dealer checking to see if their down card is an ace; if it is, they would have
+		 * Blackjack, so if they don't have Blackjack, we rule out the possibility of the down card being 
+		 * an ace. The same goes for an up card of ace, and ruling out the down card having a value of 10.
+		 * The mod operator was used above as a convenient way to find this index, and stored in a variable
+		 * as it will be used inside the loop. */
+		if (prob == 1.0 && dealer > 9) {
+			ruledOutIdx = 11 % dealer; // Index of value we rule out; only effective if 0 or 1
+			cardsPossible -= cardsLeft[ruledOutIdx];
+		}
+		
+		// When we calculate the precise probability of a point in the game being reached throughout the
+	    // for loop found below, we need cardsLeft[idx] * prob / cardsPossible, but since only 
+		// cardsLeft[idx] is dependent on each index, we calculate this ahead of the loop in order to
+		// reduce the number of computations made.
+		double totalProb = prob / cardsPossible;
 		
 		// Loops through all of the differently valued cards for the sake of seeing the result if that card
 		// is the next card dealt to the dealer.
@@ -55,7 +70,7 @@ public class BlackjackOptimization {
 			// as the second card. Essentially, if the dealer's first card was a 10, we do not need to 
 			// account for the possibility of their second card being an ace, because that possibility 
 			// does not exist. The same goes for starting with an ace and also having a 10.
-			if ((originalNum == 0 && idx == 1) || (originalNum == 1 && idx == 0)) {
+			if (prob == 1.0 && ruledOutIdx < 2 && ruledOutIdx == idx) {
 				continue;
 			}
 			
@@ -82,33 +97,19 @@ public class BlackjackOptimization {
 				continue;
 			}
 			
-			// Will store the value of the card added to the dealer's hand during this iteration
-			int currVal;
-			
-			// The card is worth 10 if the index is 0
-			if (idx == 0) {
-				currVal = 10;
-			} else if (idx == 1 && !hasAce && newDealer + 11 < 22) {
-				// If the card is an ace, the dealer does not yet have one, and adding 11 to the dealer's
-				// current total would not put it over 21
-				currVal = 11;
-				hasAce = true;
-				
-				
-			} else {
-				// If the index is not 0 or 1, or the index is 1 but the ace cannot count as 11, the 
-				// card holds a value which is the current index
-				currVal = idx;
-			}
+			// Will store the value of the card added to the dealer's hand during this iteration. 
+			// If the card is an ace, the dealer does not yet have one, and adding 11 to the dealer's
+			// current total would not put it over 21, then its value is 11 and hasAce is true. Otherwise,
+			// we get the standard value for the current card being considered.
+			int currVal = (idx == 1 && !hasAce && newDealer + 11 < 22) ? 11 : idxToVal[idx];
+			if (currVal == 11) { hasAce = true; }
 			
 			// Stores the dealer's current hand value during this sequence of cards
 			int dealerTotal = newDealer + currVal;
 			
-			// If there is an ace which counts as 11 and the dealer's new total is over 21, 
-			// the ace now counts as 1
-			if (hasAce && dealerTotal > 21) {
-				dealerTotal -= 10;
+			if (dealerTotal > 21 && hasAce) {
 				hasAce = false;
+				dealerTotal -= 10;
 			}
 			
 			// Essentially, this stores the probability that this exact point in the sequence of the 
@@ -118,7 +119,7 @@ public class BlackjackOptimization {
 			// divided by the cards the dealer could show, and multiplies this by the probability that 
 			// the current call of the method took place, or the probability that the card drawn before
 			// the current one was drawn.
-			double newProb = (double) cardsLeft[idx] / cardsThatCouldBeShown * prob;
+			double currProb = (double) cardsLeft[idx] * totalProb;
 			
 			
 			// If the total will not reach 17, the method is called recursively for the new total
@@ -127,13 +128,8 @@ public class BlackjackOptimization {
 				// Finds the probabilities of the dealer ending with different totals after showing the
 				// card corresponding to the current index. Also argues the new, copied array, which had
 				// removed from it the card the dealer showed and also argues the above mentioned 
-				// probability. 2 is also argued for the originalNum for reasons explained above, but to
-				// reiterate, the dealer's first unknown card we had to account for was already taken out
-				// of the shoe, and we knew that it did not give the dealer Blackjack. But this call of 
-				// the method is considering the possibilities of when the dealer directly draws a card
-				// from the shoe, so there are no concerns regarding having Blackjack like there were 
-				// with the original call of the method, and 2 being the argument will have no effect.
-				getDealerProbs(dealerTotal, newArray, newProb, hasAce, 2, probs);
+				// probability.
+				getDealerProbs(dealerTotal, newArray, currProb, hasAce, probs);
 				
 			} else if (dealerTotal < 22) {
 				
@@ -143,14 +139,14 @@ public class BlackjackOptimization {
 				// because the 0 index stores the probability of the dealer ending with 17, 1 index 18,
 				// etc. The probability of the dealer busting, or ending with over 21, is stored by the 
 				// 5 index.
-				probs[dealerTotal - 17] += newProb;
+				probs[dealerTotal - 17] += currProb;
 				
 			} else {
 				
 				// If the dealer's hand went over 21; the 5 index of the "probs" array will store the 
 				// probability of the dealer busting, and it will get added to it the probability that
 				// the dealer showed and pulled the cards that they did, in that same order.
-				probs[5] += newProb;
+				probs[5] += currProb;
 				
 			}
 			
@@ -174,6 +170,12 @@ public class BlackjackOptimization {
 	 * them ending with whatever total it is. */
 	public static double[] getPlayerProbs(int total, int[] cardsLeft, double prob, 
 			boolean acePresent, double[] probs, double[] dealerProbs) {
+		
+		// When we calculate the precise probability of a point in the game being reached throughout the
+	    // for loop found below, we need cardsLeft[idx] * prob / cardsPossible, but since only 
+		// cardsLeft[idx] is dependent on each index, we calculate this ahead of the loop in order to
+		// reduce the number of computations made.
+		double totalProb = prob / BlackjackSimulation.getSum(cardsLeft);
 		
 		// Loops through all of the differently valued cards for the sake of seeing the result if that card
 		// is the next card dealt to the player.
@@ -202,32 +204,19 @@ public class BlackjackOptimization {
 				continue;
 			}
 			
-			// Will store the value of the card added to the dealer's hand during this iteration
-			int currVal;
-
-			// The card is worth 10 if the index is 0
-			if (idx == 0) {
-				currVal = 10;
-			} else if (idx == 1 && !hasAce && newTotal + 11 < 22) {
-				// The 1 index corresponds to aces, so if the card is an ace, the player does not 
-				// already have an ace, and adding 11 to the current value of the player's hand, the ace
-				// counts as 11
-				currVal = 11;
-				hasAce = true;
-				
-			} else {
-				// If the index is not 0 or 1, or the index is 1 but the ace cannot count as 11
-				currVal = idx;
-			}
+			// Will store the value of the card added to the player's hand during this iteration. 
+			// If the card is an ace, the dealer does not yet have one, and adding 11 to the player's
+			// current total would not put it over 21, then its value is 11 and hasAce is true. Otherwise,
+			// we get the standard value for the current card being considered.
+			int currVal = (idx == 1 && !hasAce && newTotal + 11 < 22) ? 11 : idxToVal[idx];
+			if (currVal == 11) { hasAce = true; }
 			
 			// Will store the updated value of the player's hand
 			int playerTotal = newTotal + currVal;
 			
-			// If there is an ace which counts as 11 and the player's new total is over 21, the ace now 
-			// counts as 1
-			if (hasAce && playerTotal > 21) {
-				playerTotal -= 10;
+			if (playerTotal > 21 && hasAce) {
 				hasAce = false;
+				playerTotal -= 10;
 			}
 			
 			// Essentially, this stores the probability that this exact point in the sequence of the 
@@ -237,7 +226,7 @@ public class BlackjackOptimization {
 			// divided by the cards the dealer could show, and multiplies this by the probability that 
 			// the current call of the method took place, AKA the probability that the previous card was
 			// pulled at the time that it was.
-			double newProb = (double) cardsLeft[idx] / BlackjackSimulation.getSum(cardsLeft) * prob;
+			double newProb = (double) cardsLeft[idx] * totalProb;
 			
 			// If the player's total will not reach 12, the method is called recursively for the updated
 			// total
@@ -250,22 +239,17 @@ public class BlackjackOptimization {
 				// In all cases where the player's total is at least 19, or when they don't have an ace
 				// and their total value is at least 17, electing not to hit is always the best option,
 				// so we do not even bother to check for the decision and automatically add the probability
-				// of this sequence to the player's array of probabilities
-				if (playerTotal > 18 || (playerTotal > 16 && !hasAce)) {
+				// of this sequence to the player's array of probabilities. We also do this if we end up
+				// checking to see if the player should hit but they shouldn't.
+				if (playerTotal > 18 || (playerTotal > 16 && !hasAce) || 
+						! (boolean) shouldHitAux(playerTotal, dealerProbs, hasAce, newArray)[0]) {
 					
 					probs[playerTotal - 12] += newProb;
-				
-				// Checks to see if the player should hit based on the new total, the dealer's 
-				// probabilities, whether there is an ace present, and the array of cards left
-			    } else if ((boolean) shouldHitAux(playerTotal, dealerProbs, hasAce, newArray)[0]) {
+					
+				} else {
 					// If the player should hit again, this adds the probabilities of them ending with
 			    	// different totals after hitting, to the probabilities-storing array
 					getPlayerProbs(playerTotal, newArray, newProb, hasAce, probs, dealerProbs);
-				} else {
-					// If the player shouldn't hit, the probability of the current total, gets added to 
-					// it the probability that the exact current sequence took place in regards to the
-					// cards the player drew
-					probs[playerTotal - 12] += newProb;
 
 				}
 			} else {
@@ -336,7 +320,7 @@ public class BlackjackOptimization {
 		}
 		
 		// Stores the objects which will be returned
-		Object[] returnArray = { shouldHit, shouldDouble, winIfHit, winIfStand, shouldSurrender };
+		Object[] returnArray = { shouldHit, shouldDouble, winIfHit, winIfStand, shouldSurrender, winIfHitOnce };
 		
 		return returnArray;
 		
@@ -355,9 +339,6 @@ public class BlackjackOptimization {
 	private static Object[] shouldHitAux(int total, double[] dealerProbs, boolean acePresent, 
 			int[] cardsLeft) {
 		
-		// Stores if the player should hit
-		boolean shouldHit;
-		
 		// Stores the player's probability of winning if standing given their current total and the
 		// dealer's probabilities
 		double winIfStand = winIfStand(total, dealerProbs);
@@ -375,12 +356,13 @@ public class BlackjackOptimization {
 		// tables to observe if the number of games is really any larger than just one.
 		
 		
+		
 		// Finds the probability of the player winning while hitting
 		double winIfHit = playerWinProb(playerProbs, dealerProbs);
 		
 		// If the player is more likely to win the game by hitting than they are standing, then they
 		// should hit. Otherwise, they shouldn't
-		shouldHit = winIfHit > winIfStand;
+		boolean shouldHit = winIfHit > winIfStand;
 		
 		// Stores the array of elements to be returned
 		Object[] returnArray = { shouldHit, winIfHit, winIfStand };
@@ -405,6 +387,8 @@ public class BlackjackOptimization {
 		// Will store the probabilities
 		double[] playerProbs = new double[11];
 		
+		int sum = BlackjackSimulation.getSum(cardsLeft);
+		
 		// Loops through all of the card values in the shoe, as we will look at what happens if each of
 		// them are drawn
 		for (int i = 0; i < cardsLeft.length; i++) {
@@ -414,37 +398,23 @@ public class BlackjackOptimization {
 			int totalCopy = total;
 			boolean aceCopy = acePresent;
 			
-			// Will store the value of the current card
-			int currVal;
+			// Will store the value of the card added to the player's hand during this iteration. 
+			// If the card is an ace, the dealer does not yet have one, and adding 11 to the player's
+			// current total would not put it over 21, then its value is 11 and hasAce is true. Otherwise,
+			// we get the standard value for the current card being considered.
+			int currVal = (i == 1 && !aceCopy && totalCopy + 11 < 22) ? 11 : idxToVal[i];
+			if (currVal == 11) aceCopy = true; 
 			
-			// 0 index corresponds to cards with values of 10
-			if (i == 0) {
-				currVal = 10;
-			} else if (i == 1) {
-				// If there is no ace and adding 11 to our total would keep it at 21 or under, an ace
-				// counts as 11. Has a value of 1 otherwise
-				if (!aceCopy && totalCopy + 11 < 22) {
-					currVal = 11;
-					aceCopy = true;
-				} else {
-					currVal = 1;
-				}
-				
-			} else {
-				// Value of the card is equal to the index it is stored at
-				currVal = i;
-			}
 			
 			int newTotal = totalCopy + currVal;
 			
-			// If the total went over 21 but the player has an ace, the ace now counts as 1
 			if (newTotal > 21 && aceCopy) {
 				newTotal -= 10;
 				aceCopy = false;
 			}
 			
 			// Stores the probability that the current card was pulled
-			double newProb = (double) cardsLeft[i] / BlackjackSimulation.getSum(cardsLeft);
+			double newProb = (double) cardsLeft[i] / sum;
 			
 			// Looks at different totals that the player could end with
 			if (newTotal <= 12) {

@@ -25,7 +25,7 @@ public class BlackjackSimulation {
 		int outcomeTotals[] = new int[11];
 		
 		// How many games the program will play
-		int iterations = 1000;
+		int iterations = 25000000;
 		
 		long elapsedTime = 0;
 		
@@ -134,20 +134,10 @@ public class BlackjackSimulation {
 
 			// Stores whether the player can split their hand, which is when their two cards are the same
 			boolean splittable = playerFirst == playerSecond || (playerFirst == 11 && playerSecond == 1);
-
-			// Stores a representation of the dealer's first card, which will be relevant if it was a 10
-			// or an ace. This is an argument in the getProjectedDealerTotal method in the BlackjackBot
-			// class and implementation of its purpose is present there, but it will be explained here:
-			// If the dealer's first card is 10, we know that the second card is not an ace, because if
-			// it was, they would have had Blackjack and this point in the game would not be reached.
-			// The same logic can be used if the dealer's first card is an ace. This knowledge is utilized
-			// when considering what the dealer's second card could be and therefore their probabilities
-			// of ending with different numbers.
-			int dealerOrig = dealerFirst - 10;
 			
 			// Will store the probabilities of the dealer finishing with 17, 18, 19, 20, 21, or over 21.
 			double[] dealerProbs = BlackjackOptimization.getDealerProbs(dealerFirst, cardsLeft, 1, 
-							dealerFirst == 11, dealerOrig, new double[6]);
+							dealerFirst == 11, new double[6]);
 			
 			// Stores, in order, whether the player should hit, if they should double the stakes of the 
 			// game, the probability of winning if they hit, the probability of winning if they stand, and
@@ -235,7 +225,7 @@ public class BlackjackSimulation {
 					// been altered with the player drawing another card, and the player still does not
 					// know the value of the dealer's second card
 					double[] newDealerProbs = BlackjackOptimization.getDealerProbs(dealerFirst, cardsLeft, 
-							1, dealerFirst == 11, dealerOrig, new double[6]);
+							1, dealerFirst == 11, new double[6]);
 					
 					// Updates the array with the player's new total and the dealer's new probabilities
 					hitArray = BlackjackOptimization.shouldHit(playerTotal, newDealerProbs, playerHasAce, cardsLeft);
@@ -460,10 +450,6 @@ public class BlackjackSimulation {
 			// If the player can double
 			boolean doublable = true;
 			
-			// The index of the dealer's first card for when their value probabilities are needed to be
-			// found
-			int originalNum = dealerFirst - 10;
-			
 			// If the player's first card was an ace or they drew an ace in this hand. Essentially 
 			// stores whether the player has an ace whose value is 11
 			boolean playerHasAce = num == 11 || (i == 0 ? hit1 : hit2) == 1;
@@ -473,11 +459,9 @@ public class BlackjackSimulation {
 			// shouldn't
 			do {
 
-				
-
 				// The dealer's probabilities of ending with certain totals
 				double[] dealerProbs = BlackjackOptimization.getDealerProbs(dealerFirst, cardsLeft, 1, 
-						dealerFirst == 11, originalNum, new double[6]);
+						dealerFirst == 11, new double[6]);
 				
 				// Stores information about the player's best decisions to make in this current 
 				// situation
@@ -549,6 +533,8 @@ public class BlackjackSimulation {
 		// The dealer is only hitting while their hand's value is less than 17, so they will not even
 		// hit to begin with if that is the case
 		boolean dealerHitting = dealerTot < 17;
+		
+		boolean dealerAceCopy = dealerHasAce;
 
 		// While the dealer is supposed to hit, they will keep hitting
 		while (dealerHitting) {
@@ -557,18 +543,18 @@ public class BlackjackSimulation {
 			int nextCard = hit(trueCardsLeft);
 			
 			// If they don't have an ace and they drew an ace, it counts as 11
-			if (!dealerHasAce && nextCard == 1) {
+			if (!dealerAceCopy && nextCard == 1) {
 				nextCard = 11;
-				dealerHasAce = true;
+				dealerAceCopy = true;
 			}
 			
 			// The dealer gets added to their total the value of their new card
 			dealerTot += nextCard;
 			// If they have an ace in their hand and their total went over 21, the ace now counts as 1
 			// rather than 11
-			if (dealerHasAce && dealerTot > 21) {
+			if (dealerAceCopy && dealerTot > 21) {
 				dealerTot -= 10;
-				dealerHasAce = false;
+				dealerAceCopy = false;
 			}
 			
 			// If their total surpassed 16, they do not hit again
@@ -607,7 +593,8 @@ public class BlackjackSimulation {
 	}
 	
 	
-	/* Returns a number corresponding to a card randomly chosen from the cards available */
+	/* Returns a number corresponding to a card randomly chosen from the cards available. Returns 1
+	 * for an ace */
 	public static int hit(int[] remainingCards) {
 		Random random = new Random();
 		// Gets a random number below the number of cards remaining and assigns the corresponding card 
@@ -664,8 +651,14 @@ public class BlackjackSimulation {
 	/* Removes from the array of remaining cards, a specified card */
 	public static void removeElements(int num, int[] cardsLeft) {
 		// If the value of the card which needs to be removed is 10, 1 is subtracted at the 0 index 
-		cardsLeft[num == 10 ? 0 : num]--;
+		cardsLeft[num == 10 ? 0 : num == 11 ? 1 : num]--;
 	}
+	
+	
+	/* These following methods are used to store the amounts of games that all possible results took place
+	 * in. The Map stores the corresponding indeces in the outcomeTotals array of each of these possible
+	 * results. The printOutcomeTotals method finds the percent of all the games that each outcome occurred
+	 * in, and prints them out. */
 	
 	private static Map<Double, Integer> resultToIdx = Map.ofEntries(
 			Map.entry(-4.0, 0), Map.entry(-3.0, 1), Map.entry(-2.0, 2), Map.entry(-1.0,  3), 
@@ -674,7 +667,6 @@ public class BlackjackSimulation {
 	
 	private static void incArr(int[] outcomeTotals, double result) {
 		outcomeTotals[resultToIdx.get(result)]++;		
-		
 	}
 	
 	private static void printOutcomeTotals(int[] outcomeTotals, int iterations) {

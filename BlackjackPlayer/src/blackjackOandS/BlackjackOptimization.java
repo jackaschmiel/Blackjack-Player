@@ -396,21 +396,21 @@ public class BlackjackOptimization {
 			// These need to be set back to their original parameter value at the beginning of each 
 			// iteration, as these could get altered during the iterations
 			int totalCopy = total;
-			boolean aceCopy = acePresent;
+			boolean hasAce = acePresent;
 			
 			// Will store the value of the card added to the player's hand during this iteration. 
 			// If the card is an ace, the dealer does not yet have one, and adding 11 to the player's
 			// current total would not put it over 21, then its value is 11 and hasAce is true. Otherwise,
 			// we get the standard value for the current card being considered.
-			int currVal = (i == 1 && !aceCopy && totalCopy + 11 < 22) ? 11 : idxToVal[i];
-			if (currVal == 11) aceCopy = true; 
+			int currVal = (i == 1 && !hasAce && totalCopy + 11 < 22) ? 11 : idxToVal[i];
+			if (currVal == 11) hasAce = true; 
 			
 			
 			int newTotal = totalCopy + currVal;
 			
-			if (newTotal > 21 && aceCopy) {
+			if (newTotal > 21 && hasAce) {
 				newTotal -= 10;
-				aceCopy = false;
+				hasAce = false;
 			}
 			
 			// Stores the probability that the current card was pulled

@@ -21,22 +21,22 @@ All of the cards in a standard 52-card deck from two to ten simply have the valu
 
 Now that the idea of the game has been established, we can outline the rules that were assumed in the making of this model.
 
-Blackjack pays 3:2  
+#### Blackjack pays 3:2  
 A “Blackjack” occurs when the values of the player’s initial two cards add up to 21, in which case the player gains a profit of 1.5 times their initial wager. This is only if the dealer does not also have a Blackjack, when a push would occur.
 
-Dealer stands on soft 17  
+#### Dealer stands on soft 17  
 In some Blackjack variations, if the dealer has an ace and 6 after the initial deal, they hit, contrasting with the general rule of the dealer never hitting if their hand total is 17 or larger. However, other variations have the dealer stand in this scenario, which is what our optimization model will be doing.
 
-No resplitting  
+#### No resplitting  
 Once the player elects to split their two initial cards, if one of their two hands receives a card of that same value, they are not allowed to split again. For example, if the player starts with a Queen and Jack and elects to split these, then receiving a King with the Queen, they cannot split the King and Queen.
 
-Player can surrender after dealer checks for Blackjack  
+#### Player can surrender after dealer checks for Blackjack  
 Rather than standing, hitting, doubling, or splitting, the player can choose to “surrender” the game, conceding the game right then but only losing half of their initial wager.
 
-Player can hit split aces  
+#### Player can hit split aces  
 Those familiar with Blackjack may be aware that under some rulesets, the player cannot hit split aces after receiving the second cards for each hand. Say a player gets two aces and chooses to split them. If one of the hands gets a 2, putting that hand’s total at 13, the player is allowed to hit, as would likely be the advised option, in contrast with some variations where the player must stop hitting on that hand because it contained a split ace.
 
-Player can double on any two cards  
+#### Player can double on any two cards  
 Some variations of the game only allow the player to double the size of their wager if they have certain hand totals (9, 10, 11, for example), but the simulation allows for doubling given any two cards in the player’s hand
 
 

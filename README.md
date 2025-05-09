@@ -79,23 +79,23 @@ Of course, this is the driver of the simulation, as main() is always what is fir
 #### `public static SimulationResult simulateGames(int games, int decks, double reshuffleRatio)`
 
 ##### Parameters:
-`int games` : how many games the simulation will run
-`int decks` : how many decks of cards the shoe will hold during this simulation
-`double reshuffleRatio` : once the ratio of cards in the shoe to the total number of cards in the decks is used, the shoe is reshuffled
+`int games` how many games the simulation will run  
+`int decks` how many decks of cards the shoe will hold during this simulation  
+`double reshuffleRatio` once the ratio of cards in the shoe to the total number of cards in the decks is used, the shoe is reshuffled  
 
-This method will simply run a Blackjack game any amount of times, equal to the “games” parameter, using the given number of decks and reshuffling the shoe if the ratio of cards left in it to the original number of cards in it, dips below the reshuffleRatio parameter. It simulates the exact process of a Blackjack game, outlined in the Introduction section, and uses other methods in the BlackjackSimulation and BlackjackOptimization classes to implement our algorithm, touched on later, to make the most optimal decisions given the scenario. At the end of the simulation, the cumulative results of all of the games will be printed out, including the house edge, player edge (negation of house edge), effective win rate, and how fast the games were simulated, as well as how often each possible result of a single game occurred. 
-This method represents a Monte Carlo simulation of a stochastic process. The stochasticity lies in the fact that the first three cards (the player’s two and the dealer’s up card) are all randomly found and how often each value appears as one of these three cards will be proportional to the magnitude of that value in the shoe. While the decision-making from that point on is deterministic, the element of randomness in each simulation’s initial state qualifies it as being a stochastic process, and our algorithm is designed to handle this stochasticity. We then run a Monte Carlo simulation on this, using random sampling to find the long-term results of our algorithm’s usage. Each individual input will be the three random cards, and our long-term outputs will be our win rate/house edge/player edge as well as the probabilities of each individual game outcome.
+This method will simply run a Blackjack game any amount of times, equal to the “games” parameter, using the given number of decks and reshuffling the shoe if the ratio of cards left in it to the original number of cards in it, dips below the reshuffleRatio parameter. It simulates the exact process of a Blackjack game, outlined in the Introduction section, and uses other methods in the BlackjackSimulation and BlackjackOptimization classes to implement our algorithm, touched on later, to make the most optimal decisions given the scenario. At the end of the simulation, the cumulative results of all of the games will be printed out, including the house edge, player edge (negation of house edge), effective win rate, and how fast the games were simulated, as well as how often each possible result of a single game occurred.  
+This method represents a Monte Carlo simulation of a stochastic process. The stochasticity lies in the fact that the first three cards (the player’s two and the dealer’s up card) are all randomly found and how often each value appears as one of these three cards will be proportional to the magnitude of that value in the shoe. While the decision-making from that point on is deterministic, the element of randomness in each simulation’s initial state qualifies it as being a stochastic process, and our algorithm is designed to handle this stochasticity. We then run a Monte Carlo simulation on this, using random sampling to find the long-term results of our algorithm’s usage. Each individual input will be the three random cards, and our long-term outputs will be our win rate/house edge/player edge as well as the probabilities of each individual game outcome.  
 Returns an object storing information about the simulation.
 
 
 #### `public static double split(int num, int dealerFirst, int dealerSecond, boolean dealerHasAce, int[] cardsLeft, int[] trueCardsLeft)`
 
 ##### Parameters:
-`int num` : the value of each of the player’s two hands; the value of each of the two cards the player chose to split
-`int dealerFirst`, `int dealerSecond` : the values of the dealer’s first and second cards
-`boolean dealerHasAce` : whether the dealer has an ace among their two cards
-`int[] cardsLeft` : the array of cards left from the algorithm’s perspective, not considering the dealer’s down card; will be used to assist in decision-making throughout this method. Each index stores the number of cards left at the corresponding value, which is as follows: 0:10, 1:aces, 2:2, 3:3, …, 9:9
-`int[] trueCardsLeft` : the real array of cards left, considering the dealer’s down card; is used when drawing cards throughout this method
+`int num` the value of each of the player’s two hands; the value of each of the two cards the player chose to split  
+`int dealerFirst`, `int dealerSecond` the values of the dealer’s first and second cards
+`boolean dealerHasAce` whether the dealer has an ace among their two cards  
+`int[] cardsLeft` the array of cards left from the algorithm’s perspective, not considering the dealer’s down card; will be used to assist in decision-making throughout this method. Each index stores the number of cards left at the corresponding value, which is as follows: 0:10, 1:aces, 2:2, 3:3, …, 9:9  
+`int[] trueCardsLeft` the real array of cards left, considering the dealer’s down card; is used when drawing cards throughout this method
 
 This method will simulate a “split”, when the player’s two initial cards have the same value and they elect to split them into two separate hands while putting another one of their initial wager on the second hand, doubling the stakes of the game. It contains the exact same simulation process as simulateGames() does, except it runs both of the hands for the player before the dealer plays out their hand.
 Returns the result of the split in terms of the player’s original wager.
@@ -104,7 +104,7 @@ Returns the result of the split in terms of the player’s original wager.
 #### `public static int hit(int[] remainingCards)`
 
 ##### Parameters:
-`int[] remainingCards` : the array of cards remaining that the player and dealer will randomly be dealt cards from
+`int[] remainingCards` the array of cards remaining that the player and dealer will randomly be dealt cards from  
 
 This will get a random integer from 0 to cardsLeft - 1 (inclusive), and find the corresponding card value if all of the cards remaining were hypothetically laid out starting with 10s, then aces, 2s, 3s, and so on. That card is removed from the shoe and then its value is returned.
 
@@ -112,7 +112,7 @@ This will get a random integer from 0 to cardsLeft - 1 (inclusive), and find the
 #### `public static int getSum(int[] arr)`
 
 ##### Parameters:
-`int[] arr` : the array of cards remaining in the shoe
+`int[] arr` the array of cards remaining in the shoe
 
 
 This returns the sum of all the values in an integer array, this always being the size-10 array that stores the cards remaining of each value. Used for the purpose of finding the probability that the dealer or player ends with a certain number, as the return value of this method will be the denominator in such fractions throughout other methods in this class.
@@ -124,8 +124,8 @@ This returns the sum of all the values in an integer array, this always being th
 
 
 ##### Parameters:
-`int randomInt` : the random integer that will be translated into the value of the card
-`int[] cardsLeft` : the array of cards remaining in the shoe
+`int randomInt` the random integer that will be translated into the value of the card  
+`int[] cardsLeft` the array of cards remaining in the shoe
 
 
 This returns the value of a number as it corresponds to the amount of cards left in the shoe. Essentially, all of the remaining cards are lined up, starting with tens/jacks/queens/kings, then going to aces, then twos, and so on. This method will get the value of the card at the location corresponding to the randomInt parameter.
@@ -137,8 +137,8 @@ This returns the value of a number as it corresponds to the amount of cards left
 
 
 ##### Parameters:
-`int num` : the value of the card to be removed from the shoe
-`int[] cardsLeft` : the array of cards remaining in the shoe
+`int num` the value of the card to be removed from the shoe  
+`int[] cardsLeft` the array of cards remaining in the shoe
 
 
 This removes from the array of cards remaining, a specified card.
@@ -150,8 +150,8 @@ This removes from the array of cards remaining, a specified card.
 
 
 ##### Parameters:
-`int[] outcomeTotals` : the array representing how many times every possible single-game result has occurred
-`double result` : the result of the current game
+`int[] outcomeTotals` the array representing how many times every possible single-game result has occurred  
+`double result` the result of the current game
 
 
 This will increment the outcomeTotals array at the index that stores the result of the game that was just simulated; this is called in every simulation only once the result has been determined.
@@ -172,11 +172,11 @@ This will increment the outcomeTotals array at the index that stores the result 
 
 
 ##### Parameters:
-`int dealer` : the dealer’s current hand total
-`int[] cardsLeft` : the array of cards remaining in the shoe; size-10, each index storing how many cards of each value are left (0:10, 1:ace, 2:2, …, 9:9)
-`double prob` : the probability that this current call to the method occurred, which is used in determining the probabilities that exact recursive sequences are reached
-`boolean acePresent` : whether the dealer has an ace
-`double[] probs` : will store the dealer’s probabilities of ending with different totals. An empty, size-6 array is always argued for this. The 0 index stores the probability of the dealer ending with 17, 1 index stores 18, and so on; the 5 index stores the bust probability
+`int dealer` the dealer’s current hand total  
+`int[] cardsLeft` the array of cards remaining in the shoe; size-10, each index storing how many cards of each value are left (0:10, 1:ace, 2:2, …, 9:9)  
+`double prob` the probability that this current call to the method occurred, which is used in determining the probabilities that exact recursive sequences are reached  
+`boolean acePresent` whether the dealer has an ace  
+`double[] probs` will store the dealer’s probabilities of ending with different totals. An empty, size-6 array is always argued for this. The 0 index stores the probability of the dealer ending with 17, 1 index stores 18, and so on; the 5 index stores the bust probability
 
 
 What this method will do is loop through all of the values of cards in the shoe, checking the value of the dealer's hand if they were to get a card with each value. If it is at least 17, the "probs" array will get added to it the probability that the dealer ends with whatever number they end with. If it is less than 17, the method will be called again recursively with that sub-17 number as the argument for the "total" parameter, while arguing the probability that the previous card was pulled for the "prob" parameter, made effective by the "totalProb" local variable always being multiplied by the argument for "prob".
@@ -189,12 +189,12 @@ Returns the originally argued, empty, size-6 array which will now store the deal
 
 
 ##### Parameters:
-`int total` : the player’s current hand total, which is the sum of the values of their current card
-`int[] cardsLeft` : the array of cards remaining in the shoe; size-10, each index storing how many cards of each value are left
-`double prob` : the probability that this current call to the method occurred, which is used in determining the probabilities that exact recursive sequences are reached
-`boolean acePresent` : whether the player has an ace
-`double[] probs` : will store the player’s probabilities of ending with different totals. An empty, size-11 array is always argued for this. The 0 index stores the probability of the player ending with 12 (or less), 1 index stores 13, and so on; the 10 index stores the bust probability
-`double[] dealerProbs` : the dealer’s probabilities of ending with different totals; will be used in deciding whether a recursive call should be made
+`int total` the player’s current hand total, which is the sum of the values of their current card  
+`int[] cardsLeft` the array of cards remaining in the shoe; size-10, each index storing how many cards of each value are left  
+`double prob` the probability that this current call to the method occurred, which is used in determining the probabilities that exact recursive sequences are reached  
+`boolean acePresent` whether the player has an ace  
+`double[] probs` will store the player’s probabilities of ending with different totals. An empty, size-11 array is always argued for this. The 0 index stores the probability of the player ending with 12 (or less), 1 index stores 13, and so on; the 10 index stores the bust probability  
+`double[] dealerProbs` the dealer’s probabilities of ending with different totals; will be used in deciding whether a recursive call should be made  
 
 
 The algorithm used is similar as used in the "getDealerProbs" method, looking at all of the cards available to draw, calling the method again if the player would end with less than 12 and never
@@ -208,10 +208,10 @@ Returns the originally argued, empty, size-11 array which will now store the pla
 
 
 ##### Parameters:
-`int total` : the player’s current hand total
-`double[] dealerProbs` : the probabilities of the dealer ending with all of their possible different totals
-`boolean acePresent` : whether the player has an ace
-`int[] cardsLeft` : the array representing how many cards of each value are left in the shoe
+`int total` the player’s current hand total  
+`double[] dealerProbs` the probabilities of the dealer ending with all of their possible different totals  
+`boolean acePresent` whether the player has an ace  
+`int[] cardsLeft` : the array representing how many cards of each value are left in the shoe  
 
 
 Determines whether the player should hit or stand in a current situation, as well as whether they should double, their probability of winning while drawing another card, their probability of winning while not drawing another card, and whether they should surrender the hand. We use the shouldHitAux() method for a lot of the work, but otherwise, we find the player’s array of probabilities if they double and their win probability in that case, and then the expected value which determines if that is the optimal choice. We also see if we should surrender, when even the most optimal expected value is less than -0.5.
@@ -223,10 +223,10 @@ Determines whether the player should hit or stand in a current situation, as wel
 
 
 ##### Parameters: 
-`int total` : the player’s current hand total
-`double[] dealerProbs` : the probabilities of the dealer ending with all of their possible different totals
-`boolean acePresent` : whether the player has an ace
-`int[] cardsLeft` : the array representing how many cards of each value are left in the shoe
+`int total` the player’s current hand total  
+`double[] dealerProbs` the probabilities of the dealer ending with all of their possible different totals  
+`boolean acePresent` whether the player has an ace  
+`int[] cardsLeft` the array representing how many cards of each value are left in the shoe  
 
 
 This method determines whether the player should hit and draw another card, or stand and draw no more cards. This method very well could not exist and have its contents inside of the above shouldHit method, but the getPlayerProbs method needs to find simply if the player should hit and nothing else, so calling shouldHit from the getPlayerProbs method ran lots of unnecessary code, decreasing the program's efficiency. However, the shouldHit method also needs access to the double values found in this method, which is why the return type here is an array of objects. The algorithm used is rather straightforward; if the player's probability of winning while hitting is greater than their probability of winning while standing, then they should hit, and they should not hit otherwise. These probabilities are found with the methods below. 
@@ -239,8 +239,8 @@ Returns whether the player should hit, their win probability if hitting, and the
 
 
 ##### Parameters:
-`int total` : the player’s current hand total
-`int[] cardsLeft` : the array representing how many cards of each value are left in the shoe
+`int total` the player’s current hand total  
+`int[] cardsLeft` the array representing how many cards of each value are left in the shoe  
 
 
 This method will find the probabilities of the player ending with different totals if they were to choose to double the value of the game. In that case, they would only be allowed to draw one more card after they made the decision to double, which is what differs this method from the getPlayerProbs method, which incorporates recursion and accounts for the possibility of hitting
@@ -256,8 +256,8 @@ Returns the player’s probabilities of ending with all of the possible differen
 
 
 ##### Parameters:
-`double[] player` : the player’s array of probabilities of ending with all of their possible different totals
-`double[] dealer` : the dealer’s array of probabilities of ending with all of their possible different totals
+`double[] player` the player’s array of probabilities of ending with all of their possible different totals  
+`double[] dealer` : the dealer’s array of probabilities of ending with all of their possible different totals  
 
 
 Returns the probability of the player winning if they hit based on two parameters: the player's array of probabilities for each final total, and the dealer's. This will consider all of the pairs of player-dealer final values where the player's value is greater, and accumulate the probabilities of all of these combinations occurring; we perform convolutions of the two vectors to get this final probability. Additionally, because the two players ending the game with the same values has the effect of each of them winning half of the game, we add half of the probability of them tying to the probability of the player winning.
@@ -269,8 +269,8 @@ Returns the probability of the player winning if they hit based on two parameter
 
 
 ##### Parameters: 
-`int total` : the player’s current hand total
-`double[] dealerProbs` :  the dealer’s array of probabilities of ending with all of their possible different totals
+`int total` the player’s current hand total  
+`double[] dealerProbs` the dealer’s array of probabilities of ending with all of their possible different totals  
 
 
 This method finds the probability of the player winning if they elect to stand and not draw another card, ending with their current total. That probability is based on parameters for the player's total and the dealer's probabilities of ending with various values. The player will win the game if the dealer busts or their current total is greater than the dealer's. Also, because the player and dealer ending with the same total results in each of them effectively winning half of the game, we add half of the probability of them ending with the same total to the variable that stores the win probability; this is consistent with what we did in the playerWinProb() method, for when the player would elect to hit.
@@ -282,9 +282,13 @@ This method finds the probability of the player winning if they elect to stand a
 
 
 ##### Parameters:
-`double prob` : a given probability
+`double prob` a given probability  
 
 
 This method will simply return the expected difference in games won between the player and the dealer, given a probability.
+
+
+
+
 
 
